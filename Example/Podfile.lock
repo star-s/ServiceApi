@@ -1,0 +1,16 @@
+PODS:
+  - ServiceApi (0.1.0)
+
+DEPENDENCIES:
+  - ServiceApi (from `../`)
+
+EXTERNAL SOURCES:
+  ServiceApi:
+    :path: ../
+
+SPEC CHECKSUMS:
+  ServiceApi: e4c82e25e52c7e51d6534ea0b6e696a15c43f021
+
+PODFILE CHECKSUM: 4754e334502de5603a22ee0fe82ee3afbc618590
+
+COCOAPODS: 1.1.1

@@ -1,0 +1,22 @@
+{
+  "name": "ServiceApi",
+  "version": "0.1.0",
+  "summary": "A short description of ServiceApi.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/Sergey Starukhin/ServiceApi",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Sergey Starukhin": "star.s@me.com"
+  },
+  "source": {
+    "git": "https://github.com/Sergey Starukhin/ServiceApi.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "ServiceApi/Classes/**/*"
+}

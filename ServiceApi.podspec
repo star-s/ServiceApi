@@ -38,5 +38,7 @@ Implement facade pattern for hide interaction with network service by AFNetworki
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
+  s.public_header_files = 'ServiceApi/Classes/Public/*.h'
+  s.private_header_files = 'ServiceApi/Classes/Private/*.h'
   s.dependency 'AFNetworking', '~> 3.0'
 end

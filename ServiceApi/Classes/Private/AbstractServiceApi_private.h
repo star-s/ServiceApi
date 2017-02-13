@@ -6,7 +6,7 @@
 //  Copyright © 2017 Sergey Starukhin. All rights reserved.
 //
 
-#import "AbstractServiceApi.h"
+#import <ServiceApi/AbstractServiceApi.h>
 
 @class AFHTTPSessionManager;
 

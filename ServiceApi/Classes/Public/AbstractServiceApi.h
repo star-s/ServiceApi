@@ -26,6 +26,10 @@ typedef void(^ServiceApiResultBlock)(id _Nullable resultObject, NSError * _Nulla
 
 + (NSProgress *)put:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
 
++ (NSProgress *)patch:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+
++ (NSProgress *)delete:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+
 + (NSProgress *)post:(NSString *)servicePath
            formParts:(NSArray <id <AbstractFormPart>> *)parts
                names:(NSArray <NSString *> *)names

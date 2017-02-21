@@ -42,6 +42,16 @@
     return [[self sharedInstance] put: servicePath request: request completion: completion];
 }
 
++ (NSProgress *)patch:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
+{
+    return [[self sharedInstance] patch: servicePath request: request completion: completion];
+}
+
++ (NSProgress *)delete:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
+{
+    return [[self sharedInstance] delete: servicePath request: request completion: completion];
+}
+
 + (NSProgress *)post:(NSString *)servicePath
            formParts:(NSArray <id <AbstractFormPart>> *)parts
                names:(NSArray <NSString *> *)names
@@ -143,6 +153,34 @@
                                       parameters: parameters.parameters
                                          success: [self successBlockForServicePath: servicePath completion: completion]
                                          failure: [self failureBlockForServicePath: servicePath completion: completion]];
+    
+    return [sessionManager uploadProgressForTask: task];
+}
+
+- (NSProgress *)patch:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+{
+    AFHTTPSessionManager *sessionManager = self.sessionManager;
+    
+    ServiceApiRequestParameters *parameters = [self parametersForServicePath: servicePath request: request];
+    
+    NSURLSessionTask *task = [sessionManager PATCH: parameters.URLString
+                                        parameters: parameters.parameters
+                                           success: [self successBlockForServicePath: servicePath completion: completion]
+                                           failure: [self failureBlockForServicePath: servicePath completion: completion]];
+    
+    return [sessionManager uploadProgressForTask: task];
+}
+
+- (NSProgress *)delete:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+{
+    AFHTTPSessionManager *sessionManager = self.sessionManager;
+    
+    ServiceApiRequestParameters *parameters = [self parametersForServicePath: servicePath request: request];
+    
+    NSURLSessionTask *task = [sessionManager DELETE: parameters.URLString
+                                         parameters: parameters.parameters
+                                            success: [self successBlockForServicePath: servicePath completion: completion]
+                                            failure: [self failureBlockForServicePath: servicePath completion: completion]];
     
     return [sessionManager uploadProgressForTask: task];
 }

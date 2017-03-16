@@ -19,10 +19,13 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
 
 @property (nonatomic, readonly) AFHTTPSessionManager *sessionManager;
 
-+ (AbstractServiceApi *)sharedInstance;
+@property (nonatomic, null_resettable) NSValueTransformer *requestTransformer;
+
+- (instancetype)initWithSessionManager:(AFHTTPSessionManager *)manager NS_DESIGNATED_INITIALIZER;
+
++ (instancetype)sharedInstance;
 
 - (nullable SuccessBlock)successBlockForServicePath:(NSString *)servicePath completion:(ServiceApiResultBlock)completion;
-
 - (nullable FailureBlock)failureBlockForServicePath:(NSString *)servicePath completion:(ServiceApiResultBlock)completion;
 
 @end

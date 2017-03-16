@@ -23,8 +23,7 @@
 
 + (void)setRequestTransformer:(nullable NSValueTransformer *)transformer
 {
-    NSAssert([[self superclass] isSubclassOfClass: [AbstractServiceApi class]], @"Method %@ must be called only from subclasses %@", NSStringFromSelector(_cmd), NSStringFromClass([AbstractServiceApi class]));
-    [NSValueTransformer setValueTransformer: transformer forName: [self requestTransformerName]];
+    [[self sharedInstance] setRequestTransformer: transformer];
 }
 
 + (NSProgress *)post:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
@@ -62,12 +61,7 @@
 
 #pragma mark - Private API
 
-+ (NSString *)requestTransformerName
-{
-    return [NSStringFromClass(self) stringByAppendingString: @"RequestTransformer"];
-}
-
-+ (AbstractServiceApi *)sharedInstance
++ (instancetype)sharedInstance
 {
     NSAssert([[self superclass] isSubclassOfClass: [AbstractServiceApi class]], @"Method %@ must be called only from subclasses %@", NSStringFromSelector(_cmd), NSStringFromClass([AbstractServiceApi class]));
     static AbstractServiceApi *sharedService = nil;
@@ -81,19 +75,34 @@
     return sharedService;
 }
 
-- (AFHTTPSessionManager *)sessionManager
+- (instancetype)init
 {
-    [NSException raise: NSGenericException format: @"Method %@ is abstract and must be overrided", NSStringFromSelector(_cmd)];
-    return nil;
+    return [self initWithSessionManager: [AFHTTPSessionManager manager]];
+}
+
+- (instancetype)initWithSessionManager:(AFHTTPSessionManager *)manager
+{
+    self = [super init];
+    if (self) {
+        _sessionManager = manager;
+    }
+    return self;
+}
+
+- (NSValueTransformer *)requestTransformer
+{
+    if (!_requestTransformer) {
+        _requestTransformer = [[NSValueTransformer alloc] init];
+    }
+    return _requestTransformer;
 }
 
 #pragma mark - Internal stuff
 
 - (ServiceApiRequestParameters *)parametersForServicePath:(NSString *)servicePath request:(nullable id)request
 {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName: [self.class requestTransformerName]];
     return [[ServiceApiRequestParameters alloc] initWithURLString: servicePath
-                                                       parameters: transformer ? [transformer transformedValue: request] : request];
+                                                       parameters: [self.requestTransformer transformedValue: request]];
 }
 
 - (SuccessBlock)successBlockForServicePath:(NSString *)servicePath completion:(ServiceApiResultBlock)completion

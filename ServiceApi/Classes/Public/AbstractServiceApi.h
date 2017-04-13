@@ -33,6 +33,8 @@ typedef void(^ServiceApiResultBlock)(id _Nullable resultObject, NSError * _Nulla
                names:(NSArray <NSString *> *)names
           completion:(ServiceApiResultBlock)completion;
 
++ (void)setDebug:(BOOL)enable;
+
 @end
 
 NS_ASSUME_NONNULL_END

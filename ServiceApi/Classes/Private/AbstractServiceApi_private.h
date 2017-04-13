@@ -21,6 +21,8 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
 
 @property (nonatomic, readonly) NSValueTransformer *requestTransformer;
 
+@property (nonatomic, getter=isDebug) BOOL debug;
+
 - (instancetype)initWithSessionManager:(AFHTTPSessionManager *)manager requestTransformer:(NSValueTransformer *)transformer NS_DESIGNATED_INITIALIZER;
 
 + (instancetype)sharedInstance;

@@ -54,6 +54,11 @@
     return [[self sharedInstance] post: servicePath formParts: parts names: names completion: completion];
 }
 
++ (void)setDebug:(BOOL)enable
+{
+    [[self sharedInstance] setDebug: enable];
+}
+
 #pragma mark - Private API
 
 + (instancetype)sharedInstance
@@ -237,6 +242,16 @@
                                           failure: [self failureBlockForServicePath: servicePath completion: completion]];
     
     return [sessionManager uploadProgressForTask: task];
+}
+
+- (void)setDebug:(BOOL)enable
+{
+    AFJSONRequestSerializer *requestSerializer = (AFJSONRequestSerializer *)self.sessionManager.requestSerializer;
+    
+    if ([requestSerializer isKindOfClass: [AFJSONRequestSerializer class]]) {
+        requestSerializer.writingOptions = enable ? NSJSONWritingPrettyPrinted : kNilOptions;
+    }
+    _debug = enable;
 }
 
 @end

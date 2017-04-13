@@ -18,8 +18,6 @@ typedef void(^ServiceApiResultBlock)(id _Nullable resultObject, NSError * _Nulla
 
 + (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath;
 
-+ (void)setRequestTransformer:(nullable NSValueTransformer *)transformer;
-
 + (NSProgress *)post:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
 
 + (NSProgress *)get:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;

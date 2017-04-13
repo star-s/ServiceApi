@@ -21,11 +21,6 @@
     [NSValueTransformer setValueTransformer: transformer forName: servicePath];
 }
 
-+ (void)setRequestTransformer:(nullable NSValueTransformer *)transformer
-{
-    [[self sharedInstance] setRequestTransformer: transformer];
-}
-
 + (NSProgress *)post:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
     return [[self sharedInstance] post: servicePath request: request completion: completion];
@@ -77,24 +72,17 @@
 
 - (instancetype)init
 {
-    return [self initWithSessionManager: [AFHTTPSessionManager manager]];
+    return [self initWithSessionManager: [AFHTTPSessionManager manager] requestTransformer: [[NSValueTransformer alloc] init]];
 }
 
-- (instancetype)initWithSessionManager:(AFHTTPSessionManager *)manager
+- (instancetype)initWithSessionManager:(AFHTTPSessionManager *)manager requestTransformer:(NSValueTransformer *)transformer
 {
     self = [super init];
     if (self) {
         _sessionManager = manager;
+        _requestTransformer = transformer;
     }
     return self;
-}
-
-- (NSValueTransformer *)requestTransformer
-{
-    if (!_requestTransformer) {
-        _requestTransformer = [[NSValueTransformer alloc] init];
-    }
-    return _requestTransformer;
 }
 
 #pragma mark - Internal stuff

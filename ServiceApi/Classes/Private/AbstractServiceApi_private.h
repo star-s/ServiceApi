@@ -19,9 +19,9 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
 
 @property (nonatomic, readonly) AFHTTPSessionManager *sessionManager;
 
-@property (nonatomic, null_resettable) NSValueTransformer *requestTransformer;
+@property (nonatomic, readonly) NSValueTransformer *requestTransformer;
 
-- (instancetype)initWithSessionManager:(AFHTTPSessionManager *)manager NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithSessionManager:(AFHTTPSessionManager *)manager requestTransformer:(NSValueTransformer *)transformer NS_DESIGNATED_INITIALIZER;
 
 + (instancetype)sharedInstance;
 

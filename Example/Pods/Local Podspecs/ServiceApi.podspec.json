@@ -1,6 +1,6 @@
 {
   "name": "ServiceApi",
-  "version": "0.2.0",
+  "version": "0.3.2",
   "summary": "Abstract Api for interaction with REST service.",
   "description": "Implement facade pattern for hide interaction with network service by AFNetworking from clients",
   "homepage": "https://github.com/star-s/ServiceApi",
@@ -13,10 +13,13 @@
   },
   "source": {
     "git": "https://github.com/star-s/ServiceApi.git",
-    "tag": "0.2.0"
+    "tag": "0.3.2"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "8.0",
+    "osx": "10.9",
+    "watchos": "2.0",
+    "tvos": "9.0"
   },
   "source_files": "ServiceApi/Classes/**/*",
   "public_header_files": "ServiceApi/Classes/Public/*.h",

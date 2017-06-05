@@ -9,6 +9,7 @@
 #import "AbstractServiceApi_private.h"
 #import "ServiceApiRequestParameters.h"
 #import "ServiceApiFormPartProtocol.h"
+#import <objc/runtime.h>
 
 @import AFNetworking;
 
@@ -64,14 +65,18 @@
 + (instancetype)sharedInstance
 {
     NSAssert([[self superclass] isSubclassOfClass: [AbstractServiceApi class]], @"Method %@ must be called only from subclasses %@", NSStringFromSelector(_cmd), NSStringFromClass([AbstractServiceApi class]));
-    static AbstractServiceApi *sharedService = nil;
     
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
+    AbstractServiceApi *sharedService = nil;
+    
+    @synchronized (self) {
         //
-        sharedService = [[self alloc] init];
-    });
-    
+        sharedService = objc_getAssociatedObject(self, _cmd);
+        
+        if (sharedService == nil) {
+            sharedService = [[self alloc] init];
+            objc_setAssociatedObject(self, _cmd, sharedService, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+    }
     return sharedService;
 }
 

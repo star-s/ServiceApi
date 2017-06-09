@@ -17,7 +17,7 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
 
 @interface AbstractServiceApi ()
 
-@property (nonatomic, readonly) AFHTTPSessionManager *sessionManager;
+@property (nonatomic, readonly) __kindof AFHTTPSessionManager *sessionManager;
 
 @property (nonatomic, readonly) NSValueTransformer *requestTransformer;
 

@@ -19,6 +19,10 @@
             //
             NSURLComponents *URLComponents = [[NSURLComponents alloc] initWithString: URLString];
             
+            NSString *pathExtension = URLComponents.path.pathExtension;
+            
+            URLComponents.path = URLComponents.path.stringByDeletingPathExtension;
+            
             NSMutableDictionary *params = [NSMutableDictionary dictionaryWithDictionary: parameters];
             
             NSMutableSet *keysForRemove = [NSMutableSet set];
@@ -34,7 +38,7 @@
                     [keysForRemove addObject: key];
                 }
             }];
-            URLComponents.path = [NSString pathWithComponents: pathComponents];
+            URLComponents.path = [[NSString pathWithComponents: pathComponents] stringByAppendingPathExtension: pathExtension];
             
             [params removeObjectsForKeys: keysForRemove.allObjects];
             

@@ -7,11 +7,48 @@
 //
 
 #import "AbstractServiceApi_private.h"
-#import "ServiceApiRequestParameters.h"
+#import "ServiceApiQuery.h"
 #import "ServiceApiFormPartProtocol.h"
 #import <objc/runtime.h>
 
 @import AFNetworking;
+
+@implementation AbstractServiceApi (ServiceApiDeprecated)
+
++ (NSProgress *)post:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
+{
+    return [self POST: servicePath request: request completion: completion];
+}
+
++ (NSProgress *)get:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
+{
+    return [self GET: servicePath request: request completion: completion];
+}
+
++ (NSProgress *)put:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
+{
+    return [self PUT: servicePath request: request completion: completion];
+}
+
++ (NSProgress *)patch:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
+{
+    return [self PATCH: servicePath request: request completion: completion];
+}
+
++ (NSProgress *)delete:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
+{
+    return [self DELETE: servicePath request: request completion: completion];
+}
+
++ (NSProgress *)post:(NSString *)servicePath
+           formParts:(NSArray <id <AbstractFormPart>> *)parts
+               names:(NSArray <NSString *> *)names
+          completion:(ServiceApiResultBlock)completion
+{
+    return [self POST: servicePath formParts: parts names: names completion: completion];
+}
+
+@end
 
 @implementation AbstractServiceApi
 
@@ -22,37 +59,42 @@
     [NSValueTransformer setValueTransformer: transformer forName: servicePath];
 }
 
-+ (NSProgress *)post:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)POST:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
-    return [[self sharedInstance] post: servicePath request: request completion: completion];
+    AbstractServiceApi *api = [self sharedInstance];
+    return [api POST: [api queryWithServicePath: servicePath request: request completion: completion]];
 }
 
-+ (NSProgress *)get:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)GET:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
-    return [[self sharedInstance] get: servicePath request: request completion: completion];
+    AbstractServiceApi *api = [self sharedInstance];
+    return [api GET: [api queryWithServicePath: servicePath request: request completion: completion]];
 }
 
-+ (NSProgress *)put:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)PUT:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
-    return [[self sharedInstance] put: servicePath request: request completion: completion];
+    AbstractServiceApi *api = [self sharedInstance];
+    return [api PUT: [api queryWithServicePath: servicePath request: request completion: completion]];
 }
 
-+ (NSProgress *)patch:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)PATCH:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
 {
-    return [[self sharedInstance] patch: servicePath request: request completion: completion];
+    AbstractServiceApi *api = [self sharedInstance];
+    return [api PATCH: [api queryWithServicePath: servicePath request: request completion: completion]];
 }
 
-+ (NSProgress *)delete:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)DELETE:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
 {
-    return [[self sharedInstance] delete: servicePath request: request completion: completion];
+    AbstractServiceApi *api = [self sharedInstance];
+    return [api DELETE: [api queryWithServicePath: servicePath request: request completion: completion]];
 }
 
-+ (NSProgress *)post:(NSString *)servicePath
++ (NSProgress *)POST:(NSString *)servicePath
            formParts:(NSArray <id <AbstractFormPart>> *)parts
                names:(NSArray <NSString *> *)names
           completion:(ServiceApiResultBlock)completion
 {
-    return [[self sharedInstance] post: servicePath formParts: parts names: names completion: completion];
+    return [[self sharedInstance] POST: servicePath formParts: parts names: names completion: completion];
 }
 
 + (void)setDebug:(BOOL)enable
@@ -97,17 +139,20 @@
 
 #pragma mark - Internal stuff
 
-- (ServiceApiRequestParameters *)parametersForServicePath:(NSString *)servicePath request:(nullable id)request
+- (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
-    return [[ServiceApiRequestParameters alloc] initWithURLString: servicePath
-                                                       parameters: [self.requestTransformer transformedValue: request]];
+    return [[ServiceApiQuery alloc] initWithURLString: servicePath
+                                           parameters: [self.requestTransformer transformedValue: request]
+                                              success: [self successBlockForServicePath: servicePath completion: completion]
+                                              failure: [self failureBlockForServicePath: servicePath completion: completion]];
 }
 
 - (SuccessBlock)successBlockForServicePath:(NSString *)servicePath completion:(ServiceApiResultBlock)completion
 {
+    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName: servicePath];
+    
     return completion ? ^(NSURLSessionDataTask *task, id _Nullable responseObject){
         //
-        NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName: servicePath];
         id result = transformer ? [transformer transformedValue: responseObject] : responseObject;
         completion(result, nil);
     } : NULL;
@@ -120,79 +165,69 @@
     } : NULL;
 }
 
-- (NSProgress *)post:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+- (NSProgress *)POST:(ServiceApiQuery *)query
 {
     AFHTTPSessionManager *sessionManager = self.sessionManager;
     
-    ServiceApiRequestParameters *parameters = [self parametersForServicePath: servicePath request: request];
-    
-    NSURLSessionTask *task = [sessionManager POST: parameters.URLString
-                                       parameters: parameters.parameters
+    NSURLSessionTask *task = [sessionManager POST: query.URLString
+                                       parameters: query.parameters
                                          progress: NULL
-                                          success: [self successBlockForServicePath: servicePath completion: completion]
-                                          failure: [self failureBlockForServicePath: servicePath completion: completion]];
+                                          success: query.success
+                                          failure: query.failure];
     
     return [sessionManager uploadProgressForTask: task];
 }
 
-- (NSProgress *)get:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+- (NSProgress *)GET:(ServiceApiQuery *)query
 {
     AFHTTPSessionManager *sessionManager = self.sessionManager;
     
-    ServiceApiRequestParameters *parameters = [self parametersForServicePath: servicePath request: request];
-    
-    NSURLSessionTask *task = [sessionManager GET: parameters.URLString
-                                      parameters: parameters.parameters
+    NSURLSessionTask *task = [sessionManager GET: query.URLString
+                                      parameters: query.parameters
                                         progress: NULL
-                                         success: [self successBlockForServicePath: servicePath completion: completion]
-                                         failure: [self failureBlockForServicePath: servicePath completion: completion]];
+                                         success: query.success
+                                         failure: query.failure];
     
     return [sessionManager downloadProgressForTask: task];
 }
 
-- (NSProgress *)put:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+- (NSProgress *)PUT:(ServiceApiQuery *)query
 {
     AFHTTPSessionManager *sessionManager = self.sessionManager;
     
-    ServiceApiRequestParameters *parameters = [self parametersForServicePath: servicePath request: request];
-    
-    NSURLSessionTask *task = [sessionManager PUT: parameters.URLString
-                                      parameters: parameters.parameters
-                                         success: [self successBlockForServicePath: servicePath completion: completion]
-                                         failure: [self failureBlockForServicePath: servicePath completion: completion]];
+    NSURLSessionTask *task = [sessionManager PUT: query.URLString
+                                      parameters: query.parameters
+                                         success: query.success
+                                         failure: query.failure];
     
     return [sessionManager uploadProgressForTask: task];
 }
 
-- (NSProgress *)patch:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+- (NSProgress *)PATCH:(ServiceApiQuery *)query
 {
     AFHTTPSessionManager *sessionManager = self.sessionManager;
     
-    ServiceApiRequestParameters *parameters = [self parametersForServicePath: servicePath request: request];
-    
-    NSURLSessionTask *task = [sessionManager PATCH: parameters.URLString
-                                        parameters: parameters.parameters
-                                           success: [self successBlockForServicePath: servicePath completion: completion]
-                                           failure: [self failureBlockForServicePath: servicePath completion: completion]];
+    NSURLSessionTask *task = [sessionManager PATCH: query.URLString
+                                        parameters: query.parameters
+                                           success: query.success
+                                           failure: query.failure];
     
     return [sessionManager uploadProgressForTask: task];
 }
 
-- (NSProgress *)delete:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
+- (NSProgress *)DELETE:(ServiceApiQuery *)query
 {
     AFHTTPSessionManager *sessionManager = self.sessionManager;
     
-    ServiceApiRequestParameters *parameters = [self parametersForServicePath: servicePath request: request];
-    
-    NSURLSessionTask *task = [sessionManager DELETE: parameters.URLString
-                                         parameters: parameters.parameters
-                                            success: [self successBlockForServicePath: servicePath completion: completion]
-                                            failure: [self failureBlockForServicePath: servicePath completion: completion]];
+    NSURLSessionTask *task = [sessionManager DELETE: query.URLString
+                                         parameters: query.parameters
+                                            success: query.success
+                                            failure: query.failure];
     
     return [sessionManager uploadProgressForTask: task];
 }
 
-- (NSProgress *)post:(NSString *)servicePath
+- (NSProgress *)POST:(NSString *)servicePath
            formParts:(NSArray <id <AbstractFormPart>> *)parts
                names:(NSArray <NSString *> *)names
           completion:(ServiceApiResultBlock)completion

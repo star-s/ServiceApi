@@ -1,16 +1,16 @@
 //
-//  ServiceApiRequestParameters.m
+//  ServiceApiQuery.m
 //  ServiceApi
 //
 //  Created by Sergey Starukhin on 12.02.17.
 //  Copyright © 2017 Sergey Starukhin. All rights reserved.
 //
 
-#import "ServiceApiRequestParameters.h"
+#import "ServiceApiQuery.h"
 
-@implementation ServiceApiRequestParameters
+@implementation ServiceApiQuery
 
-- (instancetype)initWithURLString:(NSString *)URLString parameters:(id)parameters
+- (instancetype)initWithURLString:(NSString *)URLString parameters:(id)parameters success:(SuccessHandleBlock)success failure:(FailureHandleBlock)failure
 {
     self = [super init];
     if (self) {
@@ -48,6 +48,8 @@
             _parameters = parameters;
             _URLString = URLString;
         }
+        _success = [success copy];
+        _failure = [failure copy];
     }
     return self;
 }

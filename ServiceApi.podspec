@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'ServiceApi'
-  s.version          = '0.3.3'
+  s.version          = '0.3.4'
   s.summary          = 'Abstract Api for interaction with REST service.'
 
 # This description is used to generate tags and improve search results.

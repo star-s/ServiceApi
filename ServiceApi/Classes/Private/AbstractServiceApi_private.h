@@ -25,23 +25,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)sharedInstance;
 
-- (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath
-                                  request:(nullable id)request
-                               completion:(ServiceApiResultBlock)completion;
-
-- (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath
-                                formParts:(NSArray <id <AbstractFormPart>> *)parts
-                                    names:(NSArray <NSString *> *)names
-                               completion:(ServiceApiResultBlock)completion;
-
 - (void)handleResponseObject:(id)responseObject forQuery:(ServiceApiQuery *)query;
 - (void)handleError:(NSError *)error forQuery:(ServiceApiQuery *)query;
-
-- (NSProgress *)GET:(ServiceApiQuery *)query;
-- (NSProgress *)POST:(ServiceApiQuery *)query;
-- (NSProgress *)PUT:(ServiceApiQuery *)query;
-- (NSProgress *)PATCH:(ServiceApiQuery *)query;
-- (NSProgress *)DELETE:(ServiceApiQuery *)query;
 
 @end
 

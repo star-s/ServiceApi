@@ -10,7 +10,7 @@
 
 @implementation ServiceApiQuery
 
-- (instancetype)initWithURLString:(NSString *)URLString parameters:(id)parameters success:(SuccessHandleBlock)success failure:(FailureHandleBlock)failure
+- (instancetype)initWithURLString:(NSString *)URLString parameters:(id)parameters
 {
     self = [super init];
     if (self) {
@@ -48,10 +48,24 @@
             _parameters = parameters;
             _URLString = URLString;
         }
-        _success = [success copy];
-        _failure = [failure copy];
     }
     return self;
 }
 
+- (void)performCallback:(id)object
+{
+    if (self.callback == nil) {
+        return;
+    }
+    if ([object isKindOfClass: [NSError class]]) {
+        self.callback(nil, object);
+    } else {
+        NSValueTransformer *transformer = self.responseTransformer;
+        self.callback((transformer ? [transformer transformedValue: object] : object), nil);
+    }
+}
+
+@end
+
+@implementation ServiceApiMultiPartsQuery
 @end

@@ -13,6 +13,9 @@
 
 @import AFNetworking;
 
+typedef void(^SuccessBlock)(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject);
+typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error);
+
 @implementation AbstractServiceApi (ServiceApiDeprecated)
 
 + (NSProgress *)post:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
@@ -94,7 +97,8 @@
                names:(NSArray <NSString *> *)names
           completion:(ServiceApiResultBlock)completion
 {
-    return [[self sharedInstance] POST: servicePath formParts: parts names: names completion: completion];
+    AbstractServiceApi *api = [self sharedInstance];
+    return [api POST: [api queryWithServicePath: servicePath formParts: parts names: names completion: completion]];
 }
 
 + (void)setDebug:(BOOL)enable
@@ -137,44 +141,107 @@
     return self;
 }
 
-#pragma mark - Internal stuff
-
-- (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
+- (void)handleResponseObject:(id)responseObject forQuery:(ServiceApiQuery *)query
 {
-    return [[ServiceApiQuery alloc] initWithURLString: servicePath
-                                           parameters: [self.requestTransformer transformedValue: request]
-                                              success: [self successBlockForServicePath: servicePath completion: completion]
-                                              failure: [self failureBlockForServicePath: servicePath completion: completion]];
+    [query performCallback: responseObject];
 }
 
-- (SuccessBlock)successBlockForServicePath:(NSString *)servicePath completion:(ServiceApiResultBlock)completion
+- (void)handleError:(NSError *)error forQuery:(ServiceApiQuery *)query
 {
-    NSValueTransformer *transformer = [NSValueTransformer valueTransformerForName: servicePath];
-    
-    return completion ? ^(NSURLSessionDataTask *task, id _Nullable responseObject){
-        //
-        id result = transformer ? [transformer transformedValue: responseObject] : responseObject;
-        completion(result, nil);
-    } : NULL;
+    [query performCallback: error];
 }
 
-- (FailureBlock)failureBlockForServicePath:(NSString *)servicePath completion:(ServiceApiResultBlock)completion
+- (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath
+                                  request:(nullable id)request
+                               completion:(ServiceApiResultBlock)completion
 {
-    return completion ? ^(NSURLSessionDataTask * _Nullable task, NSError *error){
-        completion(nil, error);
-    } : NULL;
+    ServiceApiQuery *result = [[ServiceApiQuery alloc] initWithURLString: servicePath
+                                                              parameters: [self.requestTransformer transformedValue: request]];
+    result.responseTransformer = [NSValueTransformer valueTransformerForName: servicePath];
+    result.callback = completion;
+    return result;
 }
 
-- (NSProgress *)POST:(ServiceApiQuery *)query
+- (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath
+                                formParts:(NSArray <id <AbstractFormPart>> *)parts
+                                    names:(NSArray <NSString *> *)names
+                               completion:(ServiceApiResultBlock)completion
+{
+    NSParameterAssert(parts.count == names.count);
+
+    ServiceApiMultiPartsQuery *result = [[ServiceApiMultiPartsQuery alloc] initWithURLString: servicePath parameters: nil];
+    result.parts = parts;
+    result.names = names;
+    result.responseTransformer = [NSValueTransformer valueTransformerForName: servicePath];
+    result.callback = completion;
+    return result;
+}
+
+- (NSProgress *)POST:(ServiceApiMultiPartsQuery *)query
 {
     AFHTTPSessionManager *sessionManager = self.sessionManager;
     
-    NSURLSessionTask *task = [sessionManager POST: query.URLString
-                                       parameters: query.parameters
-                                         progress: NULL
-                                          success: query.success
-                                          failure: query.failure];
+    SuccessBlock success = ^(NSURLSessionDataTask *task, id _Nullable responseObject){
+        [self handleResponseObject: responseObject forQuery: query];
+    };
+    FailureBlock failure = ^(NSURLSessionDataTask * _Nullable task, NSError *error){
+        [self handleError: error forQuery: query];
+    };
+    NSURLSessionTask *task = nil;
     
+    if ([query isKindOfClass: [ServiceApiMultiPartsQuery class]]) {
+        //
+        task = [sessionManager POST: query.URLString
+                         parameters: query.parameters
+          constructingBodyWithBlock: ^(id<AFMultipartFormData>  _Nonnull formData){
+              //
+              [query.parts enumerateObjectsUsingBlock: ^(id<AbstractFormPart>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                  //
+                  NSString *partName = query.names[idx];
+                  
+                  if ([obj conformsToProtocol: @protocol(DataFormPart)]) {
+                      //
+                      id <DataFormPart> formPart = (id <DataFormPart>)obj;
+                      
+                      [formData appendPartWithFileData: [formPart data]
+                                                  name: partName
+                                              fileName: [formPart fileName]
+                                              mimeType: [formPart mimeType]];
+                      
+                  } else if ([obj conformsToProtocol: @protocol(FileFormPart)]) {
+                      //
+                      id <FileFormPart> formPart = (id <FileFormPart>)obj;
+                      
+                      [formData appendPartWithFileURL: [formPart fileURL]
+                                                 name: partName
+                                             fileName: [formPart fileName]
+                                             mimeType: [formPart mimeType]
+                                                error: NULL];
+                      
+                  } else if ([obj conformsToProtocol: @protocol(StreamFormPart)]) {
+                      //
+                      id <StreamFormPart> formPart = (id <StreamFormPart>)obj;
+                      
+                      [formData appendPartWithInputStream: [formPart inputStream]
+                                                     name: partName
+                                                 fileName: [formPart fileName]
+                                                   length: [formPart inputStreamLength]
+                                                 mimeType: [formPart mimeType]];
+                  } else {
+                      [NSException raise: NSInvalidArgumentException format: @"Object %@ conform only abstract protocol", obj];
+                  }
+              }];
+          }
+                           progress: NULL
+                            success: success
+                            failure: failure];
+    } else {
+        task = [sessionManager POST: query.URLString
+                         parameters: query.parameters
+                           progress: NULL
+                            success: success
+                            failure: failure];
+    }
     return [sessionManager uploadProgressForTask: task];
 }
 
@@ -185,8 +252,12 @@
     NSURLSessionTask *task = [sessionManager GET: query.URLString
                                       parameters: query.parameters
                                         progress: NULL
-                                         success: query.success
-                                         failure: query.failure];
+                                         success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
+                                             [self handleResponseObject: responseObject forQuery: query];
+                                         }
+                                         failure: ^(NSURLSessionDataTask * _Nullable task, NSError *error){
+                                             [self handleError: error forQuery: query];
+                                         }];
     
     return [sessionManager downloadProgressForTask: task];
 }
@@ -197,8 +268,12 @@
     
     NSURLSessionTask *task = [sessionManager PUT: query.URLString
                                       parameters: query.parameters
-                                         success: query.success
-                                         failure: query.failure];
+                                         success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
+                                             [self handleResponseObject: responseObject forQuery: query];
+                                         }
+                                         failure: ^(NSURLSessionDataTask * _Nullable task, NSError *error){
+                                             [self handleError: error forQuery: query];
+                                         }];
     
     return [sessionManager uploadProgressForTask: task];
 }
@@ -209,8 +284,12 @@
     
     NSURLSessionTask *task = [sessionManager PATCH: query.URLString
                                         parameters: query.parameters
-                                           success: query.success
-                                           failure: query.failure];
+                                           success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
+                                               [self handleResponseObject: responseObject forQuery: query];
+                                           }
+                                           failure: ^(NSURLSessionDataTask * _Nullable task, NSError *error){
+                                               [self handleError: error forQuery: query];
+                                           }];
     
     return [sessionManager uploadProgressForTask: task];
 }
@@ -221,65 +300,12 @@
     
     NSURLSessionTask *task = [sessionManager DELETE: query.URLString
                                          parameters: query.parameters
-                                            success: query.success
-                                            failure: query.failure];
-    
-    return [sessionManager uploadProgressForTask: task];
-}
-
-- (NSProgress *)POST:(NSString *)servicePath
-           formParts:(NSArray <id <AbstractFormPart>> *)parts
-               names:(NSArray <NSString *> *)names
-          completion:(ServiceApiResultBlock)completion
-{
-    NSParameterAssert(parts.count == names.count);
-    
-    AFHTTPSessionManager *sessionManager = self.sessionManager;
-    
-    NSURLSessionTask *task = [sessionManager POST: servicePath
-                                       parameters: nil
-                        constructingBodyWithBlock: ^(id<AFMultipartFormData>  _Nonnull formData){
-                            //
-                            [parts enumerateObjectsUsingBlock: ^(id<AbstractFormPart>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-                                //
-                                NSString *partName = names[idx];
-                                
-                                if ([obj conformsToProtocol: @protocol(DataFormPart)]) {
-                                    //
-                                    id <DataFormPart> formPart = (id <DataFormPart>)obj;
-                                    
-                                    [formData appendPartWithFileData: [formPart data]
-                                                                name: partName
-                                                            fileName: [formPart fileName]
-                                                            mimeType: [formPart mimeType]];
-                                    
-                                } else if ([obj conformsToProtocol: @protocol(FileFormPart)]) {
-                                    //
-                                    id <FileFormPart> formPart = (id <FileFormPart>)obj;
-                                    
-                                    [formData appendPartWithFileURL: [formPart fileURL]
-                                                               name: partName
-                                                           fileName: [formPart fileName]
-                                                           mimeType: [formPart mimeType]
-                                                              error: NULL];
-                                    
-                                } else if ([obj conformsToProtocol: @protocol(StreamFormPart)]) {
-                                    //
-                                    id <StreamFormPart> formPart = (id <StreamFormPart>)obj;
-                                    
-                                    [formData appendPartWithInputStream: [formPart inputStream]
-                                                                   name: partName
-                                                               fileName: [formPart fileName]
-                                                                 length: [formPart inputStreamLength]
-                                                               mimeType: [formPart mimeType]];
-                                } else {
-                                    [NSException raise: NSInvalidArgumentException format: @"Object %@ conform only abstract protocol", obj];
-                                }
-                            }];
-                        }
-                                         progress: NULL
-                                          success: [self successBlockForServicePath: servicePath completion: completion]
-                                          failure: [self failureBlockForServicePath: servicePath completion: completion]];
+                                            success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
+                                                [self handleResponseObject: responseObject forQuery: query];
+                                            }
+                                            failure: ^(NSURLSessionDataTask * _Nullable task, NSError *error){
+                                                [self handleError: error forQuery: query];
+                                            }];
     
     return [sessionManager uploadProgressForTask: task];
 }

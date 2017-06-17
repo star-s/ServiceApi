@@ -5,6 +5,8 @@ framework module ServiceApi {
   module * { export * }
 
   explicit module Private {
-    header "AbstractServiceApi_private.h"
+    header "AbstractServiceApi_Private.h"
+    header "NetworkServiceApi_Private.h"
+    header "ServiceApiQuery.h"
   }
 }

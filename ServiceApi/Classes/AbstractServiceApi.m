@@ -160,31 +160,31 @@
 
 - (NSProgress *)POST:(ServiceApiMultiPartsQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** %@ only defined for abstract class.  Define %s!", NSStringFromSelector(_cmd), __PRETTY_FUNCTION__];
+    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
     return nil;
 }
 
 - (NSProgress *)GET:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** %@ only defined for abstract class.  Define %s!", NSStringFromSelector(_cmd), __PRETTY_FUNCTION__];
+    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
     return nil;
 }
 
 - (NSProgress *)PUT:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** %@ only defined for abstract class.  Define %s!", NSStringFromSelector(_cmd), __PRETTY_FUNCTION__];
+    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
     return nil;
 }
 
 - (NSProgress *)PATCH:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** %@ only defined for abstract class.  Define %s!", NSStringFromSelector(_cmd), __PRETTY_FUNCTION__];
+    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
     return nil;
 }
 
 - (NSProgress *)DELETE:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** %@ only defined for abstract class.  Define %s!", NSStringFromSelector(_cmd), __PRETTY_FUNCTION__];
+    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
     return nil;
 }
 

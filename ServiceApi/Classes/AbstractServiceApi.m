@@ -10,6 +10,16 @@
 #import "ServiceApiQuery.h"
 #import <objc/runtime.h>
 
+@interface AbstractServiceApi ()
+
+- (NSProgress *)GET:(ServiceApiQuery *)query;
+- (NSProgress *)POST:(ServiceApiQuery *)query;
+- (NSProgress *)PUT:(ServiceApiQuery *)query;
+- (NSProgress *)PATCH:(ServiceApiQuery *)query;
+- (NSProgress *)DELETE:(ServiceApiQuery *)query;
+
+@end
+
 @implementation AbstractServiceApi
 
 + (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(NSString *)method
@@ -86,6 +96,8 @@
 
 + (instancetype)sharedInstance
 {
+    NSAssert([[self superclass] isSubclassOfClass: [AbstractServiceApi class]], @"Method %@ must be called only from subclasses %@", NSStringFromSelector(_cmd), NSStringFromClass([AbstractServiceApi class]));
+
     AbstractServiceApi *sharedService = nil;
     
     @synchronized (self) {
@@ -98,20 +110,6 @@
         }
     }
     return sharedService;
-}
-
-- (instancetype)initWithRequestTransformer:(NSValueTransformer *)transformer
-{
-    self = [super init];
-    if (self) {
-        _requestTransformer = transformer;
-    }
-    return self;
-}
-
-- (instancetype)init
-{
-    return [self initWithRequestTransformer: nil];
 }
 
 - (void)handleResponseObject:(id)responseObject forQuery:(ServiceApiQuery *)query
@@ -160,32 +158,27 @@
 
 - (NSProgress *)POST:(ServiceApiMultiPartsQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
-    return nil;
+    return [self.transport service: self POST: query];
 }
 
 - (NSProgress *)GET:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
-    return nil;
+    return [self.transport service: self GET: query];
 }
 
 - (NSProgress *)PUT:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
-    return nil;
+    return [self.transport service: self PUT: query];
 }
 
 - (NSProgress *)PATCH:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
-    return nil;
+    return [self.transport service: self PATCH: query];
 }
 
 - (NSProgress *)DELETE:(ServiceApiQuery *)query
 {
-    [NSException raise: NSInvalidArgumentException format: @"*** -%@ only defined for abstract class.  Define -[%@ %@]!", NSStringFromSelector(_cmd), NSStringFromClass(self.class), NSStringFromSelector(_cmd)];
-    return nil;
+    return [self.transport service: self DELETE: query];
 }
 
 - (void)setDebug:(BOOL)enable

@@ -15,6 +15,5 @@ FOUNDATION_EXPORT double ServiceApiVersionNumber;
 FOUNDATION_EXPORT const unsigned char ServiceApiVersionString[];
 
 #import <ServiceApi/AbstractServiceApi.h>
-#import <ServiceApi/NetworkServiceApi.h>
 #import <ServiceApi/ServiceApiFormPartProtocol.h>
 #import <ServiceApi/AbstractServiceApi+ServiceApiDeprecated.h>

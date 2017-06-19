@@ -12,24 +12,28 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol ServiceApiTransport <NSObject>
+
+- (NSProgress *)service:(AbstractServiceApi *)service GET:(ServiceApiQuery *)query;
+- (NSProgress *)service:(AbstractServiceApi *)service POST:(ServiceApiQuery *)query;
+- (NSProgress *)service:(AbstractServiceApi *)service PUT:(ServiceApiQuery *)query;
+- (NSProgress *)service:(AbstractServiceApi *)service PATCH:(ServiceApiQuery *)query;
+- (NSProgress *)service:(AbstractServiceApi *)service DELETE:(ServiceApiQuery *)query;
+
+@end
+
 @interface AbstractServiceApi ()
 
-@property (nonatomic, nullable, readonly) NSValueTransformer *requestTransformer;
+@property (atomic, nullable) NSValueTransformer *requestTransformer;
+
+@property (atomic, nullable) id <ServiceApiTransport> transport;
 
 @property (nonatomic, getter=isDebug) BOOL debug;
-
-- (instancetype)initWithRequestTransformer:(nullable NSValueTransformer *)transformer NS_DESIGNATED_INITIALIZER;
 
 + (instancetype)sharedInstance;
 
 - (void)handleResponseObject:(id)responseObject forQuery:(ServiceApiQuery *)query;
 - (void)handleError:(NSError *)error forQuery:(ServiceApiQuery *)query;
-
-- (NSProgress *)GET:(ServiceApiQuery *)query;
-- (NSProgress *)POST:(ServiceApiQuery *)query;
-- (NSProgress *)PUT:(ServiceApiQuery *)query;
-- (NSProgress *)PATCH:(ServiceApiQuery *)query;
-- (NSProgress *)DELETE:(ServiceApiQuery *)query;
 
 @end
 

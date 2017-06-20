@@ -14,7 +14,7 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - ServiceApi (0.4.0):
+  - ServiceApi (0.5.0):
     - AFNetworking (~> 3.0)
 
 DEPENDENCIES:
@@ -26,7 +26,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  ServiceApi: bfbfbea337b79ab292125325501e57b4563ea23e
+  ServiceApi: f544ac53c1f3c84d82c22dabef140dd771804816
 
 PODFILE CHECKSUM: 29f283a16537700139e940405d738953620f1fde
 

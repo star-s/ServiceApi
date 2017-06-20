@@ -164,26 +164,31 @@
 
 - (NSProgress *)POST:(ServiceApiMultiPartsQuery *)query
 {
+    NSAssert(self.transport, @"Transport is missing");
     return [self.transport service: self POST: query];
 }
 
 - (NSProgress *)GET:(ServiceApiQuery *)query
 {
+    NSAssert(self.transport, @"Transport is missing");
     return [self.transport service: self GET: query];
 }
 
 - (NSProgress *)PUT:(ServiceApiQuery *)query
 {
+    NSAssert(self.transport, @"Transport is missing");
     return [self.transport service: self PUT: query];
 }
 
 - (NSProgress *)PATCH:(ServiceApiQuery *)query
 {
+    NSAssert(self.transport, @"Transport is missing");
     return [self.transport service: self PATCH: query];
 }
 
 - (NSProgress *)DELETE:(ServiceApiQuery *)query
 {
+    NSAssert(self.transport, @"Transport is missing");
     return [self.transport service: self DELETE: query];
 }
 

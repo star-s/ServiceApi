@@ -24,9 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AbstractServiceApi ()
 
-@property (atomic, nullable) NSValueTransformer *requestTransformer;
+@property (nonatomic, nullable, readonly) NSValueTransformer *requestTransformer;
 
-@property (atomic, nullable) id <ServiceApiTransport> transport;
+@property (atomic, strong) id <ServiceApiTransport> transport;
 
 @property (nonatomic, getter=isDebug) BOOL debug;
 

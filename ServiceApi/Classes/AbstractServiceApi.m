@@ -24,14 +24,15 @@
 
 + (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(NSString *)method
 {
-    NSValueTransformer *result = nil;
+    __block NSValueTransformer *result = nil;
     
-    if (method.length) {
-        result = [NSValueTransformer valueTransformerForName: [method.uppercaseString stringByAppendingString: servicePath]];
-    }
-    if (result == nil) {
-        result = [NSValueTransformer valueTransformerForName: servicePath];
-    }
+    NSArray *names = [NSArray arrayWithObjects: servicePath, [method.uppercaseString stringByAppendingString: servicePath], nil];
+    
+    [names enumerateObjectsWithOptions: NSEnumerationReverse usingBlock: ^(NSString * _Nonnull name, NSUInteger idx, BOOL * _Nonnull stop) {
+        //
+        result = [NSValueTransformer valueTransformerForName: name];
+        *stop = result != nil;
+    }];
     return result;
 }
 
@@ -112,6 +113,11 @@
     return sharedService;
 }
 
+- (NSValueTransformer *)requestTransformer
+{
+    return nil;
+}
+
 - (void)handleResponseObject:(id)responseObject forQuery:(ServiceApiQuery *)query
 {
     [query performCallback: responseObject];
@@ -179,11 +185,6 @@
 - (NSProgress *)DELETE:(ServiceApiQuery *)query
 {
     return [self.transport service: self DELETE: query];
-}
-
-- (void)setDebug:(BOOL)enable
-{
-    _debug = enable;
 }
 
 @end

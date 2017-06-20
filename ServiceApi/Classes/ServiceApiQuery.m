@@ -59,9 +59,10 @@
     }
     if ([object isKindOfClass: [NSError class]]) {
         self.callback(nil, object);
+    } else if (self.responseTransformer) {
+        self.callback([self.responseTransformer transformedValue: object], nil);
     } else {
-        NSValueTransformer *transformer = self.responseTransformer;
-        self.callback((transformer ? [transformer transformedValue: object] : object), nil);
+        self.callback(object, nil);
     }
 }
 

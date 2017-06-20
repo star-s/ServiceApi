@@ -85,7 +85,7 @@
           completion:(ServiceApiResultBlock)completion
 {
     AbstractServiceApi *api = [self sharedInstance];
-    return [api POST: [api queryWithServicePath: servicePath formParts: parts names: names completion: completion]];
+    return [api POST: [api queryWithServicePath: servicePath request: nil formParts: parts names: names completion: completion]];
 }
 
 + (void)setDebug:(BOOL)enable
@@ -148,13 +148,14 @@
 }
 
 - (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath
+                                  request:(id)request
                                 formParts:(NSArray <id <AbstractFormPart>> *)parts
                                     names:(NSArray <NSString *> *)names
                                completion:(ServiceApiResultBlock)completion
 {
     NSParameterAssert(parts.count == names.count);
-
-    ServiceApiMultiPartsQuery *result = [[ServiceApiMultiPartsQuery alloc] initWithURLString: servicePath parameters: nil];
+    id parameters = self.requestTransformer ? [self.requestTransformer transformedValue: request] : request;
+    ServiceApiMultiPartsQuery *result = [[ServiceApiMultiPartsQuery alloc] initWithURLString: servicePath parameters: parameters];
     result.parts = parts;
     result.names = names;
     result.responseTransformer = [self responseTransformerForServicePath: servicePath HTTPMethod: @"POST"];

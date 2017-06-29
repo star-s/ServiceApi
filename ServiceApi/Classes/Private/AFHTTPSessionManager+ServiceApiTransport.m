@@ -65,14 +65,14 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
                 }
             }];
         };
-        task = [self POST: query.URLString
+        task = [self POST: query.URL.absoluteString
                parameters: query.parameters
 constructingBodyWithBlock: constructorBodyBlock
                  progress: NULL
                   success: success
                   failure: failure];
     } else {
-        task = [self POST: query.URLString
+        task = [self POST: query.URL.absoluteString
                parameters: query.parameters
                  progress: NULL
                   success: success
@@ -83,7 +83,7 @@ constructingBodyWithBlock: constructorBodyBlock
 
 - (NSProgress *)service:(id <AbstractService>)service GET:(id <ServiceQuery>)query;
 {
-    NSURLSessionTask *task = [self GET: query.URLString
+    NSURLSessionTask *task = [self GET: query.URL.absoluteString
                             parameters: query.parameters
                               progress: NULL
                                success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
@@ -98,7 +98,7 @@ constructingBodyWithBlock: constructorBodyBlock
 
 - (NSProgress *)service:(id <AbstractService>)service PUT:(id <ServiceQuery>)query;
 {
-    NSURLSessionTask *task = [self PUT: query.URLString
+    NSURLSessionTask *task = [self PUT: query.URL.absoluteString
                             parameters: query.parameters
                                success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
                                    [service handleResponseObject: responseObject forQuery: query];
@@ -112,7 +112,7 @@ constructingBodyWithBlock: constructorBodyBlock
 
 - (NSProgress *)service:(id <AbstractService>)service PATCH:(id <ServiceQuery>)query;
 {
-    NSURLSessionTask *task = [self PATCH: query.URLString
+    NSURLSessionTask *task = [self PATCH: query.URL.absoluteString
                               parameters: query.parameters
                                  success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
                                      [service handleResponseObject: responseObject forQuery: query];
@@ -126,7 +126,7 @@ constructingBodyWithBlock: constructorBodyBlock
 
 - (NSProgress *)service:(id <AbstractService>)service DELETE:(id <ServiceQuery>)query;
 {
-    NSURLSessionTask *task = [self DELETE: query.URLString
+    NSURLSessionTask *task = [self DELETE: query.URL.absoluteString
                                parameters: query.parameters
                                   success: ^(NSURLSessionDataTask *task, id _Nullable responseObject){
                                       [service handleResponseObject: responseObject forQuery: query];

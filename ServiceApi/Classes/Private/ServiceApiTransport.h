@@ -12,8 +12,8 @@
 
 @protocol ServiceQuery <NSObject>
 
+@property (nonatomic, readonly) NSURL *URL;
 @property (nonatomic, readonly) id parameters;
-@property (nonatomic, readonly) NSString *URLString;
 
 @end
 

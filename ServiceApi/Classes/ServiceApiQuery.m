@@ -66,6 +66,11 @@
     }
 }
 
+- (NSURL *)URL
+{
+    return [NSURL URLWithString: self.URLString];
+}
+
 @end
 
 @implementation ServiceApiMultiPartsQuery

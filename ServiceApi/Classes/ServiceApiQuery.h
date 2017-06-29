@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <ServiceApi/ServiceApiTransport.h>
 
 @protocol AbstractFormPart;
 
@@ -14,11 +15,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^ServiceApiQueryCallback)(id _Nullable resultObject, NSError * _Nullable error);
 
-@interface ServiceApiQuery : NSObject
+@interface ServiceApiQuery : NSObject <ServiceQuery>
 
 @property (nonatomic, nullable, readonly) id parameters;
 
-@property (nonatomic, nullable, copy, readonly) NSString *URLString;
+@property (nonatomic, nullable, readonly) NSString *URLString;
 
 @property (nonatomic, nullable, strong) NSValueTransformer *responseTransformer;
 
@@ -32,10 +33,10 @@ typedef void(^ServiceApiQueryCallback)(id _Nullable resultObject, NSError * _Nul
 
 @end
 
-@interface ServiceApiMultiPartsQuery : ServiceApiQuery
+@interface ServiceApiMultiPartsQuery : ServiceApiQuery <ServiceMultiPartsQuery>
 
-@property (nonatomic, copy) NSArray <id <AbstractFormPart>> *parts;
-@property (nonatomic, copy) NSArray <NSString *> *names;
+@property (nonatomic, strong) NSArray <id <AbstractFormPart>> *parts;
+@property (nonatomic, strong) NSArray <NSString *> *names;
 
 @end
 

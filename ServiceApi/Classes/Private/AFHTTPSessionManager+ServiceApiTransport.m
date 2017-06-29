@@ -7,7 +7,6 @@
 //
 
 #import "AFHTTPSessionManager+ServiceApiTransport.h"
-#import "ServiceApiQuery.h"
 #import "ServiceApiFormPartProtocol.h"
 
 typedef void(^SuccessBlock)(NSURLSessionDataTask * _Nonnull task, id _Nullable responseObject);
@@ -15,7 +14,7 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
 
 @implementation AFHTTPSessionManager (ServiceApiTransport)
 
-- (NSProgress *)service:(id <AbstractService>)service POST:(ServiceApiMultiPartsQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service POST:(id <ServiceMultiPartsQuery>)query;
 {
     SuccessBlock success = ^(NSURLSessionDataTask *task, id _Nullable responseObject){
         [service handleResponseObject: responseObject forQuery: query];
@@ -25,7 +24,7 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
     };
     NSURLSessionTask *task = nil;
     
-    if ([query isKindOfClass: [ServiceApiMultiPartsQuery class]]) {
+    if ([query conformsToProtocol: @protocol(ServiceMultiPartsQuery)]) {
         //
         void (^constructorBodyBlock)(id <AFMultipartFormData> formData) = ^(id <AFMultipartFormData> formData){
             //
@@ -82,7 +81,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self uploadProgressForTask: task];
 }
 
-- (NSProgress *)service:(id <AbstractService>)service GET:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service GET:(id <ServiceQuery>)query;
 {
     NSURLSessionTask *task = [self GET: query.URLString
                             parameters: query.parameters
@@ -97,7 +96,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self downloadProgressForTask: task];
 }
 
-- (NSProgress *)service:(id <AbstractService>)service PUT:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service PUT:(id <ServiceQuery>)query;
 {
     NSURLSessionTask *task = [self PUT: query.URLString
                             parameters: query.parameters
@@ -111,7 +110,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self uploadProgressForTask: task];
 }
 
-- (NSProgress *)service:(id <AbstractService>)service PATCH:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service PATCH:(id <ServiceQuery>)query;
 {
     NSURLSessionTask *task = [self PATCH: query.URLString
                               parameters: query.parameters
@@ -125,7 +124,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self uploadProgressForTask: task];
 }
 
-- (NSProgress *)service:(id <AbstractService>)service DELETE:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service DELETE:(id <ServiceQuery>)query;
 {
     NSURLSessionTask *task = [self DELETE: query.URLString
                                parameters: query.parameters

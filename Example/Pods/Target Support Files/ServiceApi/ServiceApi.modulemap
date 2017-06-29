@@ -6,7 +6,6 @@ framework module ServiceApi {
 
   explicit module Private {
     header "AbstractServiceApi_Private.h"
-    header "ServiceApiQuery.h"
     header "ServiceApiTransport.h"
     header "AFHTTPSessionManager+ServiceApiTransport.h"
   }

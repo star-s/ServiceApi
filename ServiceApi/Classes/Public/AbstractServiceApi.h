@@ -14,11 +14,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^ServiceApiResultBlock)(id _Nullable resultObject, NSError * _Nullable error);
 
+typedef NSString *ServiceApiHttpMethod NS_EXTENSIBLE_STRING_ENUM;
+
+FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodPost;
+FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodGet;
+FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodPut;
+FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodPatch;
+FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodDelete;
+
 @interface AbstractServiceApi : NSObject
 
 + (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath;
 
-+ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath HTTPMethod:(NSString *)method;
++ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method;
 
 + (NSProgress *)POST:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
 

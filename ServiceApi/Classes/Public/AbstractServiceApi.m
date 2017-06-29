@@ -10,6 +10,12 @@
 #import "ServiceApiQuery.h"
 #import <objc/runtime.h>
 
+ServiceApiHttpMethod const ServiceApiHttpMethodPost   = @"POST";
+ServiceApiHttpMethod const ServiceApiHttpMethodGet    = @"GET";
+ServiceApiHttpMethod const ServiceApiHttpMethodPut    = @"PUT";
+ServiceApiHttpMethod const ServiceApiHttpMethodPatch  = @"PATCH";
+ServiceApiHttpMethod const ServiceApiHttpMethodDelete = @"DELETE";
+
 @interface AbstractServiceApi ()
 
 - (NSProgress *)GET:(ServiceApiQuery *)query;
@@ -22,7 +28,7 @@
 
 @implementation AbstractServiceApi
 
-+ (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(NSString *)method
++ (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method
 {
     __block NSValueTransformer *result = nil;
     
@@ -38,7 +44,7 @@
 
 #pragma mark - Public API
 
-+ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath HTTPMethod:(NSString *)method
++ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method
 {
     NSString *name = method.length ? [method.uppercaseString stringByAppendingString: servicePath] : servicePath;
     [NSValueTransformer setValueTransformer: transformer forName: name];
@@ -52,31 +58,31 @@
 + (NSProgress *)POST:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
     AbstractServiceApi *api = [self sharedInstance];
-    return [api POST: [api queryWithHTTPMethod: @"POST" servicePath: servicePath request: request completion: completion]];
+    return [api POST: [api queryWithHTTPMethod: ServiceApiHttpMethodPost servicePath: servicePath request: request completion: completion]];
 }
 
 + (NSProgress *)GET:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
     AbstractServiceApi *api = [self sharedInstance];
-    return [api GET: [api queryWithHTTPMethod: @"GET" servicePath: servicePath request: request completion: completion]];
+    return [api GET: [api queryWithHTTPMethod: ServiceApiHttpMethodGet servicePath: servicePath request: request completion: completion]];
 }
 
 + (NSProgress *)PUT:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
 {
     AbstractServiceApi *api = [self sharedInstance];
-    return [api PUT: [api queryWithHTTPMethod: @"PUT" servicePath: servicePath request: request completion: completion]];
+    return [api PUT: [api queryWithHTTPMethod: ServiceApiHttpMethodPut servicePath: servicePath request: request completion: completion]];
 }
 
 + (NSProgress *)PATCH:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
 {
     AbstractServiceApi *api = [self sharedInstance];
-    return [api PATCH: [api queryWithHTTPMethod: @"PATCH" servicePath: servicePath request: request completion: completion]];
+    return [api PATCH: [api queryWithHTTPMethod: ServiceApiHttpMethodPatch servicePath: servicePath request: request completion: completion]];
 }
 
 + (NSProgress *)DELETE:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
 {
     AbstractServiceApi *api = [self sharedInstance];
-    return [api DELETE: [api queryWithHTTPMethod: @"DELETE" servicePath: servicePath request: request completion: completion]];
+    return [api DELETE: [api queryWithHTTPMethod: ServiceApiHttpMethodDelete servicePath: servicePath request: request completion: completion]];
 }
 
 + (NSProgress *)POST:(NSString *)servicePath
@@ -130,12 +136,12 @@
 
 #pragma mark - Internal stuff
 
-- (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(NSString *)method
+- (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method
 {
     return [self.class responseTransformerForServicePath: servicePath HTTPMethod: method];
 }
 
-- (ServiceApiQuery *)queryWithHTTPMethod:(NSString *)method
+- (ServiceApiQuery *)queryWithHTTPMethod:(ServiceApiHttpMethod)method
                              servicePath:(NSString *)servicePath
                                  request:(id)request
                               completion:(ServiceApiResultBlock)completion
@@ -158,7 +164,7 @@
     ServiceApiMultiPartsQuery *result = [[ServiceApiMultiPartsQuery alloc] initWithURLString: servicePath parameters: parameters];
     result.parts = parts;
     result.names = names;
-    result.responseTransformer = [self responseTransformerForServicePath: servicePath HTTPMethod: @"POST"];
+    result.responseTransformer = [self responseTransformerForServicePath: servicePath HTTPMethod: ServiceApiHttpMethodPost];
     result.callback = completion;
     return result;
 }

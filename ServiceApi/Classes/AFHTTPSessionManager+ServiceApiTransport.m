@@ -15,7 +15,7 @@ typedef void(^FailureBlock)(NSURLSessionDataTask * _Nullable task, NSError * _No
 
 @implementation AFHTTPSessionManager (ServiceApiTransport)
 
-- (NSProgress *)service:(AbstractServiceApi *)service POST:(ServiceApiMultiPartsQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service POST:(ServiceApiMultiPartsQuery *)query;
 {
     SuccessBlock success = ^(NSURLSessionDataTask *task, id _Nullable responseObject){
         [service handleResponseObject: responseObject forQuery: query];
@@ -82,7 +82,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self uploadProgressForTask: task];
 }
 
-- (NSProgress *)service:(AbstractServiceApi *)service GET:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service GET:(ServiceApiQuery *)query;
 {
     NSURLSessionTask *task = [self GET: query.URLString
                             parameters: query.parameters
@@ -97,7 +97,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self downloadProgressForTask: task];
 }
 
-- (NSProgress *)service:(AbstractServiceApi *)service PUT:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service PUT:(ServiceApiQuery *)query;
 {
     NSURLSessionTask *task = [self PUT: query.URLString
                             parameters: query.parameters
@@ -111,7 +111,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self uploadProgressForTask: task];
 }
 
-- (NSProgress *)service:(AbstractServiceApi *)service PATCH:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service PATCH:(ServiceApiQuery *)query;
 {
     NSURLSessionTask *task = [self PATCH: query.URLString
                               parameters: query.parameters
@@ -125,7 +125,7 @@ constructingBodyWithBlock: constructorBodyBlock
     return [self uploadProgressForTask: task];
 }
 
-- (NSProgress *)service:(AbstractServiceApi *)service DELETE:(ServiceApiQuery *)query;
+- (NSProgress *)service:(id <AbstractService>)service DELETE:(ServiceApiQuery *)query;
 {
     NSURLSessionTask *task = [self DELETE: query.URLString
                                parameters: query.parameters

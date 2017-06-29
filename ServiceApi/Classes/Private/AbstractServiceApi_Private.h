@@ -7,22 +7,13 @@
 //
 
 #import <ServiceApi/AbstractServiceApi.h>
+#import <ServiceApi/ServiceApiTransport.h>
 
 @class ServiceApiQuery;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol ServiceApiTransport <NSObject>
-
-- (NSProgress *)service:(AbstractServiceApi *)service GET:(ServiceApiQuery *)query;
-- (NSProgress *)service:(AbstractServiceApi *)service POST:(ServiceApiQuery *)query;
-- (NSProgress *)service:(AbstractServiceApi *)service PUT:(ServiceApiQuery *)query;
-- (NSProgress *)service:(AbstractServiceApi *)service PATCH:(ServiceApiQuery *)query;
-- (NSProgress *)service:(AbstractServiceApi *)service DELETE:(ServiceApiQuery *)query;
-
-@end
-
-@interface AbstractServiceApi ()
+@interface AbstractServiceApi () <AbstractService>
 
 @property (nonatomic, nullable, readonly) NSValueTransformer *requestTransformer;
 
@@ -31,9 +22,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, getter=isDebug) BOOL debug;
 
 + (instancetype)sharedInstance;
-
-- (void)handleResponseObject:(id)responseObject forQuery:(ServiceApiQuery *)query;
-- (void)handleError:(NSError *)error forQuery:(ServiceApiQuery *)query;
 
 @end
 

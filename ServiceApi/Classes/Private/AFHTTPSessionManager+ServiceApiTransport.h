@@ -7,7 +7,7 @@
 //
 
 #import <AFNetworking/AFNetworking.h>
-#import <ServiceApi/AbstractServiceApi_Private.h>
+#import <ServiceApi/ServiceApiTransport.h>
 
 @interface AFHTTPSessionManager (ServiceApiTransport) <ServiceApiTransport>
 

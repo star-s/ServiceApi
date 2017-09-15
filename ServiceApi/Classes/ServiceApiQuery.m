@@ -38,8 +38,11 @@
                     [keysForRemove addObject: key];
                 }
             }];
-            URLComponents.path = [[NSString pathWithComponents: pathComponents] stringByAppendingPathExtension: pathExtension];
-            
+            if (pathExtension.length > 0) {
+                URLComponents.path = [[NSString pathWithComponents: pathComponents] stringByAppendingPathExtension: pathExtension];
+            } else {
+                URLComponents.path = [NSString pathWithComponents: pathComponents];
+            }
             [params removeObjectsForKeys: keysForRemove.allObjects];
             
             _parameters = [params copy];

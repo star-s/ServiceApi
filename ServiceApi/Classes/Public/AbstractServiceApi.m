@@ -108,7 +108,9 @@ responseTransformer:(nullable id <Transformer>)transformer
                                completion:(ServiceApiResultBlock)completion
 {
     id parameters = self.requestTransformer ? [self.requestTransformer transformedValue: request] : request;
-    ServiceApiQuery *result = [[ServiceApiQuery alloc] initWithURLString: servicePath parameters: parameters];
+    ServiceApiQuery *result = [[ServiceApiQuery alloc] init];
+    result.URLString = servicePath;
+    result.parameters = parameters;
     result.responseTransformer = transformer;
     result.callback = completion;
     return result;
@@ -123,7 +125,9 @@ responseTransformer:(nullable id <Transformer>)transformer
 {
     NSParameterAssert(parts.count == names.count);
     id parameters = self.requestTransformer ? [self.requestTransformer transformedValue: request] : request;
-    ServiceApiMultiPartsQuery *result = [[ServiceApiMultiPartsQuery alloc] initWithURLString: servicePath parameters: parameters];
+    ServiceApiMultiPartsQuery *result = [[ServiceApiMultiPartsQuery alloc] init];
+    result.URLString = servicePath;
+    result.parameters = parameters;
     result.parts = parts;
     result.names = names;
     result.responseTransformer = transformer;

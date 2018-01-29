@@ -17,17 +17,13 @@ typedef void(^ServiceApiQueryCallback)(id _Nullable resultObject, NSError * _Nul
 
 @interface ServiceApiQuery : NSObject <ServiceQuery>
 
-@property (nonatomic, nullable, readonly) id parameters;
+@property (nonatomic, nullable, strong) id parameters;
 
-@property (nonatomic, nullable, readonly) NSString *URLString;
+@property (nonatomic, nullable, copy) NSString *URLString;
 
 @property (nonatomic, nullable, strong) id <Transformer> responseTransformer;
 
 @property (nonatomic, nullable, copy) ServiceApiQueryCallback callback;
-
-- (instancetype)init NS_UNAVAILABLE;
-
-- (instancetype)initWithURLString:(nullable NSString *)URLString parameters:(nullable id)parameters NS_DESIGNATED_INITIALIZER;
 
 - (void)performCallback:(nullable id)object;
 

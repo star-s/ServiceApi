@@ -4,7 +4,7 @@ platform :ios, '8.0'
 use_frameworks!
 
 target 'ServiceApi_Example' do
-  pod 'ServiceApi', :path => '../'
+  pod 'ServiceApi/AFN', :path => '../'
 
   target 'ServiceApi_Tests' do
     inherit! :search_paths

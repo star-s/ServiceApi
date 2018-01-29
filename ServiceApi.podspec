@@ -33,7 +33,22 @@ Implement facade pattern for hide interaction with network service by AFNetworki
   s.watchos.deployment_target = '2.0'
   s.tvos.deployment_target = '9.0'
 
-  s.source_files = 'ServiceApi/Classes/**/*'
+  s.default_subspec = 'Core'
+  
+  s.subspec 'Core' do |cs|
+      cs.source_files = 'ServiceApi/Classes/**/*'
+      cs.public_header_files = 'ServiceApi/Classes/Public/*.h'
+      cs.private_header_files = 'ServiceApi/Classes/Private/*.h'
+  end
+
+  s.subspec 'AFN' do |afn|
+      afn.dependency 'ServiceApi/Core'
+      afn.dependency 'AFNetworking', '~> 3.0'
+      afn.source_files = 'ServiceApi/AFN/**/*'
+      afn.private_header_files = 'ServiceApi/AFN/*.h'
+  end
+  
+  # s.source_files = 'ServiceApi/Classes/**/*'
   
   # s.resource_bundles = {
   #   'ServiceApi' => ['ServiceApi/Assets/*.png']
@@ -41,8 +56,8 @@ Implement facade pattern for hide interaction with network service by AFNetworki
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
-  s.public_header_files = 'ServiceApi/Classes/Public/*.h'
-  s.private_header_files = 'ServiceApi/Classes/Private/*.h'
+  # s.public_header_files = 'ServiceApi/Classes/Public/*.h'
+  # s.private_header_files = 'ServiceApi/Classes/Private/*.h'
   s.module_map = 'ServiceApi/ServiceApi.modulemap'
-  s.dependency 'AFNetworking', '~> 3.0'
+  # s.dependency 'AFNetworking', '~> 3.0'
 end

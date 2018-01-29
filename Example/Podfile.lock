@@ -14,11 +14,13 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
-  - ServiceApi (0.6.0):
+  - ServiceApi/AFN (0.6.0):
     - AFNetworking (~> 3.0)
+    - ServiceApi/Core
+  - ServiceApi/Core (0.6.0)
 
 DEPENDENCIES:
-  - ServiceApi (from `../`)
+  - ServiceApi/AFN (from `../`)
 
 EXTERNAL SOURCES:
   ServiceApi:
@@ -26,8 +28,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
-  ServiceApi: 7834bac9ba9f03838cc3ad4e07c1876f68a7e379
+  ServiceApi: 025a4d94a53df9feef53c99284c9db47ee49986b
 
-PODFILE CHECKSUM: 29f283a16537700139e940405d738953620f1fde
+PODFILE CHECKSUM: e80d2374a8f9529e3f747c68417985f3e4b80b04
 
 COCOAPODS: 1.3.1

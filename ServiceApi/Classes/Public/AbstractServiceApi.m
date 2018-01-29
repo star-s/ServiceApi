@@ -10,88 +10,57 @@
 #import "ServiceApiQuery.h"
 #import <objc/runtime.h>
 
-ServiceApiHttpMethod const ServiceApiHttpMethodPost   = @"POST";
-ServiceApiHttpMethod const ServiceApiHttpMethodGet    = @"GET";
-ServiceApiHttpMethod const ServiceApiHttpMethodPut    = @"PUT";
-ServiceApiHttpMethod const ServiceApiHttpMethodPatch  = @"PATCH";
-ServiceApiHttpMethod const ServiceApiHttpMethodDelete = @"DELETE";
-
-@interface AbstractServiceApi ()
-
-- (NSProgress *)GET:(ServiceApiQuery *)query;
-- (NSProgress *)POST:(ServiceApiQuery *)query;
-- (NSProgress *)PUT:(ServiceApiQuery *)query;
-- (NSProgress *)PATCH:(ServiceApiQuery *)query;
-- (NSProgress *)DELETE:(ServiceApiQuery *)query;
-
-@end
-
 @implementation AbstractServiceApi
-
-+ (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method
-{
-    __block NSValueTransformer *result = nil;
-    
-    NSArray *names = [NSArray arrayWithObjects: servicePath, [method.uppercaseString stringByAppendingString: servicePath], nil];
-    
-    [names enumerateObjectsWithOptions: NSEnumerationReverse usingBlock: ^(NSString * _Nonnull name, NSUInteger idx, BOOL * _Nonnull stop) {
-        //
-        result = [NSValueTransformer valueTransformerForName: name];
-        *stop = result != nil;
-    }];
-    return result;
-}
 
 #pragma mark - Public API
 
-+ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method
++ (NSProgress *)POST:(NSString *)servicePath
+             request:(nullable id)request
+ responseTransformer:(nullable id <Transformer>)transformer
+          completion:(ServiceApiResultBlock)completion
 {
-    NSString *name = method.length ? [method.uppercaseString stringByAppendingString: servicePath] : servicePath;
-    [NSValueTransformer setValueTransformer: transformer forName: name];
+    return [[self sharedInstance] POST: servicePath request: request responseTransformer: transformer completion: completion];
 }
 
-+ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath
++ (NSProgress *)GET:(NSString *)servicePath
+            request:(nullable id)request
+responseTransformer:(nullable id <Transformer>)transformer
+         completion:(ServiceApiResultBlock)completion
 {
-    [self setResponseTransformer: transformer forServicePath: servicePath HTTPMethod: @""];
+    return [[self sharedInstance] GET: servicePath request: request responseTransformer: transformer completion: completion];
 }
 
-+ (NSProgress *)POST:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)PUT:(NSString *)servicePath
+            request:(nullable id)request
+responseTransformer:(nullable id <Transformer>)transformer
+         completion:(ServiceApiResultBlock)completion
 {
-    AbstractServiceApi *api = [self sharedInstance];
-    return [api POST: [api queryWithHTTPMethod: ServiceApiHttpMethodPost servicePath: servicePath request: request completion: completion]];
+    return [[self sharedInstance] PUT: servicePath request: request responseTransformer: transformer completion: completion];
 }
 
-+ (NSProgress *)GET:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)PATCH:(NSString *)servicePath
+              request:(nullable id)request
+  responseTransformer:(nullable id <Transformer>)transformer
+           completion:(ServiceApiResultBlock)completion
 {
-    AbstractServiceApi *api = [self sharedInstance];
-    return [api GET: [api queryWithHTTPMethod: ServiceApiHttpMethodGet servicePath: servicePath request: request completion: completion]];
+    return [[self sharedInstance] PATCH: servicePath request: request responseTransformer: transformer completion: completion];
 }
 
-+ (NSProgress *)PUT:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion
++ (NSProgress *)DELETE:(NSString *)servicePath
+               request:(nullable id)request
+   responseTransformer:(nullable id <Transformer>)transformer
+            completion:(ServiceApiResultBlock)completion
 {
-    AbstractServiceApi *api = [self sharedInstance];
-    return [api PUT: [api queryWithHTTPMethod: ServiceApiHttpMethodPut servicePath: servicePath request: request completion: completion]];
-}
-
-+ (NSProgress *)PATCH:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
-{
-    AbstractServiceApi *api = [self sharedInstance];
-    return [api PATCH: [api queryWithHTTPMethod: ServiceApiHttpMethodPatch servicePath: servicePath request: request completion: completion]];
-}
-
-+ (NSProgress *)DELETE:(NSString *)servicePath request:(id)request completion:(ServiceApiResultBlock)completion
-{
-    AbstractServiceApi *api = [self sharedInstance];
-    return [api DELETE: [api queryWithHTTPMethod: ServiceApiHttpMethodDelete servicePath: servicePath request: request completion: completion]];
+    return [[self sharedInstance] DELETE: servicePath request: request responseTransformer: transformer completion: completion];
 }
 
 + (NSProgress *)POST:(NSString *)servicePath
            formParts:(NSArray <id <AbstractFormPart>> *)parts
                names:(NSArray <NSString *> *)names
+ responseTransformer:(nullable id <Transformer>)transformer
           completion:(ServiceApiResultBlock)completion
 {
-    AbstractServiceApi *api = [self sharedInstance];
-    return [api POST: [api queryWithServicePath: servicePath request: nil formParts: parts names: names completion: completion]];
+    return [[self sharedInstance] POST: servicePath formParts: parts names: names responseTransformer: transformer completion: completion];
 }
 
 + (void)setDebug:(BOOL)enable
@@ -119,44 +88,37 @@ ServiceApiHttpMethod const ServiceApiHttpMethodDelete = @"DELETE";
     return sharedService;
 }
 
-- (NSValueTransformer *)requestTransformer
-{
-    return nil;
-}
-
 - (void)handleResponseObject:(id)responseObject forQuery:(ServiceApiQuery *)query
 {
+    NSAssert([query isKindOfClass: [ServiceApiQuery class]], @"Unknown query class: %@", query);
     [query performCallback: responseObject];
 }
 
 - (void)handleError:(NSError *)error forQuery:(ServiceApiQuery *)query
 {
+    NSAssert([query isKindOfClass: [ServiceApiQuery class]], @"Unknown query class: %@", query);
     [query performCallback: error];
 }
 
 #pragma mark - Internal stuff
 
-- (NSValueTransformer *)responseTransformerForServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method
-{
-    return [self.class responseTransformerForServicePath: servicePath HTTPMethod: method];
-}
-
-- (ServiceApiQuery *)queryWithHTTPMethod:(ServiceApiHttpMethod)method
-                             servicePath:(NSString *)servicePath
-                                 request:(id)request
-                              completion:(ServiceApiResultBlock)completion
+- (id <ServiceQuery>)queryWithServicePath:(NSString *)servicePath
+                                  request:(nullable id)request
+                      responseTransformer:(nullable id <Transformer>)transformer
+                               completion:(ServiceApiResultBlock)completion
 {
     id parameters = self.requestTransformer ? [self.requestTransformer transformedValue: request] : request;
     ServiceApiQuery *result = [[ServiceApiQuery alloc] initWithURLString: servicePath parameters: parameters];
-    result.responseTransformer = [self responseTransformerForServicePath: servicePath HTTPMethod: method];
+    result.responseTransformer = transformer;
     result.callback = completion;
     return result;
 }
 
-- (ServiceApiQuery *)queryWithServicePath:(NSString *)servicePath
-                                  request:(id)request
+- (id <ServiceQuery>)queryWithServicePath:(NSString *)servicePath
+                                  request:(nullable id)request
                                 formParts:(NSArray <id <AbstractFormPart>> *)parts
                                     names:(NSArray <NSString *> *)names
+                      responseTransformer:(nullable id <Transformer>)transformer
                                completion:(ServiceApiResultBlock)completion
 {
     NSParameterAssert(parts.count == names.count);
@@ -164,39 +126,70 @@ ServiceApiHttpMethod const ServiceApiHttpMethodDelete = @"DELETE";
     ServiceApiMultiPartsQuery *result = [[ServiceApiMultiPartsQuery alloc] initWithURLString: servicePath parameters: parameters];
     result.parts = parts;
     result.names = names;
-    result.responseTransformer = [self responseTransformerForServicePath: servicePath HTTPMethod: ServiceApiHttpMethodPost];
+    result.responseTransformer = transformer;
     result.callback = completion;
     return result;
 }
 
-- (NSProgress *)POST:(ServiceApiMultiPartsQuery *)query
+- (NSProgress *)POST:(NSString *)servicePath
+             request:(nullable id)request
+ responseTransformer:(nullable id <Transformer>)transformer
+          completion:(ServiceApiResultBlock)completion
 {
     NSAssert(self.transport, @"Transport is missing");
+    id <ServiceQuery> query = [self queryWithServicePath: servicePath request: request responseTransformer: transformer completion: completion];
     return [self.transport service: self POST: query];
 }
 
-- (NSProgress *)GET:(ServiceApiQuery *)query
+- (NSProgress *)GET:(NSString *)servicePath
+            request:(nullable id)request
+responseTransformer:(nullable id <Transformer>)transformer
+         completion:(ServiceApiResultBlock)completion
 {
     NSAssert(self.transport, @"Transport is missing");
+    id <ServiceQuery> query = [self queryWithServicePath: servicePath request: request responseTransformer: transformer completion: completion];
     return [self.transport service: self GET: query];
 }
 
-- (NSProgress *)PUT:(ServiceApiQuery *)query
+- (NSProgress *)PUT:(NSString *)servicePath
+            request:(nullable id)request
+responseTransformer:(nullable id <Transformer>)transformer
+         completion:(ServiceApiResultBlock)completion
 {
     NSAssert(self.transport, @"Transport is missing");
+    id <ServiceQuery> query = [self queryWithServicePath: servicePath request: request responseTransformer: transformer completion: completion];
     return [self.transport service: self PUT: query];
 }
 
-- (NSProgress *)PATCH:(ServiceApiQuery *)query
+- (NSProgress *)PATCH:(NSString *)servicePath
+              request:(nullable id)request
+  responseTransformer:(nullable id <Transformer>)transformer
+           completion:(ServiceApiResultBlock)completion
 {
     NSAssert(self.transport, @"Transport is missing");
+    id <ServiceQuery> query = [self queryWithServicePath: servicePath request: request responseTransformer: transformer completion: completion];
     return [self.transport service: self PATCH: query];
 }
 
-- (NSProgress *)DELETE:(ServiceApiQuery *)query
+- (NSProgress *)DELETE:(NSString *)servicePath
+               request:(nullable id)request
+   responseTransformer:(nullable id <Transformer>)transformer
+            completion:(ServiceApiResultBlock)completion
 {
     NSAssert(self.transport, @"Transport is missing");
+    id <ServiceQuery> query = [self queryWithServicePath: servicePath request: request responseTransformer: transformer completion: completion];
     return [self.transport service: self DELETE: query];
+}
+
+- (NSProgress *)POST:(NSString *)servicePath
+           formParts:(NSArray <id <AbstractFormPart>> *)parts
+               names:(NSArray <NSString *> *)names
+ responseTransformer:(nullable id <Transformer>)transformer
+          completion:(ServiceApiResultBlock)completion
+{
+    NSAssert(self.transport, @"Transport is missing");
+    id <ServiceQuery> query = [self queryWithServicePath: servicePath request: nil formParts: parts names: names responseTransformer: transformer completion: completion];
+    return [self.transport service: self POST: query];
 }
 
 @end

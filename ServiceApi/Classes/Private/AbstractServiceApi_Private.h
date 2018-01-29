@@ -8,6 +8,7 @@
 
 #import <ServiceApi/AbstractServiceApi.h>
 #import <ServiceApi/ServiceApiTransport.h>
+#import <ServiceApi/Transformer.h>
 
 @class ServiceApiQuery;
 
@@ -15,13 +16,25 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AbstractServiceApi () <AbstractService>
 
-@property (nonatomic, nullable, readonly) NSValueTransformer *requestTransformer;
+@property (atomic, strong, nullable) id <Transformer> requestTransformer;
 
 @property (atomic, strong) id <ServiceApiTransport> transport;
 
 @property (nonatomic, getter=isDebug) BOOL debug;
 
-+ (instancetype)sharedInstance;
+//+ (instancetype)sharedInstance;
+
+- (id <ServiceQuery>)queryWithServicePath:(NSString *)servicePath
+                                  request:(nullable id)request
+                      responseTransformer:(nullable id <Transformer>)transformer
+                               completion:(ServiceApiResultBlock)completion;
+
+- (id <ServiceQuery>)queryWithServicePath:(NSString *)servicePath
+                                  request:(nullable id)request
+                                formParts:(NSArray <id <AbstractFormPart>> *)parts
+                                    names:(NSArray <NSString *> *)names
+                      responseTransformer:(nullable id <Transformer>)transformer
+                               completion:(ServiceApiResultBlock)completion;
 
 @end
 

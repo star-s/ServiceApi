@@ -7,6 +7,7 @@
 //
 
 #import "ServiceApiQuery.h"
+#import <ServiceApi/Transformer.h>
 
 @implementation ServiceApiQuery
 

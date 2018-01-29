@@ -1,9 +1,9 @@
 //
 //  ServiceApiTransport.h
-//  Pods
+//  ServiceApi
 //
 //  Created by Sergey Starukhin on 29.06.17.
-//
+//  Copyright © 2017 Sergey Starukhin. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

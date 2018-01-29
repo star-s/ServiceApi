@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <ServiceApi/ServiceApiTransport.h>
 
-@protocol AbstractFormPart;
+@protocol AbstractFormPart, Transformer;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -21,7 +21,7 @@ typedef void(^ServiceApiQueryCallback)(id _Nullable resultObject, NSError * _Nul
 
 @property (nonatomic, nullable, readonly) NSString *URLString;
 
-@property (nonatomic, nullable, strong) NSValueTransformer *responseTransformer;
+@property (nonatomic, nullable, strong) id <Transformer> responseTransformer;
 
 @property (nonatomic, nullable, copy) ServiceApiQueryCallback callback;
 

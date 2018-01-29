@@ -8,39 +8,43 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AbstractFormPart;
+@protocol AbstractFormPart, Transformer;
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^ServiceApiResultBlock)(id _Nullable resultObject, NSError * _Nullable error);
 
-typedef NSString *ServiceApiHttpMethod NS_EXTENSIBLE_STRING_ENUM;
-
-FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodPost;
-FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodGet;
-FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodPut;
-FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodPatch;
-FOUNDATION_EXPORT ServiceApiHttpMethod const ServiceApiHttpMethodDelete;
-
 @interface AbstractServiceApi : NSObject
 
-+ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath;
++ (NSProgress *)POST:(NSString *)servicePath
+             request:(nullable id)request
+ responseTransformer:(nullable id <Transformer>)transformer
+          completion:(ServiceApiResultBlock)completion;
 
-+ (void)setResponseTransformer:(nullable NSValueTransformer *)transformer forServicePath:(NSString *)servicePath HTTPMethod:(ServiceApiHttpMethod)method;
++ (NSProgress *)GET:(NSString *)servicePath
+            request:(nullable id)request
+responseTransformer:(nullable id <Transformer>)transformer
+         completion:(ServiceApiResultBlock)completion;
 
-+ (NSProgress *)POST:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
++ (NSProgress *)PUT:(NSString *)servicePath
+            request:(nullable id)request
+responseTransformer:(nullable id <Transformer>)transformer
+         completion:(ServiceApiResultBlock)completion;
 
-+ (NSProgress *)GET:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
++ (NSProgress *)PATCH:(NSString *)servicePath
+              request:(nullable id)request
+  responseTransformer:(nullable id <Transformer>)transformer
+           completion:(ServiceApiResultBlock)completion;
 
-+ (NSProgress *)PUT:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
-
-+ (NSProgress *)PATCH:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
-
-+ (NSProgress *)DELETE:(NSString *)servicePath request:(nullable id)request completion:(ServiceApiResultBlock)completion;
++ (NSProgress *)DELETE:(NSString *)servicePath
+               request:(nullable id)request
+   responseTransformer:(nullable id <Transformer>)transformer
+            completion:(ServiceApiResultBlock)completion;
 
 + (NSProgress *)POST:(NSString *)servicePath
            formParts:(NSArray <id <AbstractFormPart>> *)parts
                names:(NSArray <NSString *> *)names
+ responseTransformer:(nullable id <Transformer>)transformer
           completion:(ServiceApiResultBlock)completion;
 
 + (void)setDebug:(BOOL)enable;

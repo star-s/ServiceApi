@@ -8,8 +8,4 @@ framework module ServiceApi {
     header "AbstractServiceApi_Private.h"
     header "ServiceApiTransport.h"
   }
-
-  explicit module AfnSupport {
-    header "AFHTTPSessionManager+ServiceApiTransport.h"
-  }
 }
